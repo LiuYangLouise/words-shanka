@@ -1,0 +1,1594 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reborn单词英语版 - 词汇检查测试</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #F1ECEO; min-height: 100vh; padding: 20px; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 30px; padding: 20px; background: linear-gradient(to right, #117C0D 0%, #2B9E25 100%); color: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(17, 124, 13, 0.3); }
+        h1 { font-size: 2.5rem; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2); }
+        .subtitle { font-size: 1.2rem; opacity: 0.9; margin-bottom: 5px; }
+        .mode-selector { display: flex; justify-content: center; gap: 20px; margin-top: 20px; }
+        .mode-btn { background: rgba(255, 255, 255, 0.2); border: 2px solid white; color: white; padding: 10px 25px; border-radius: 30px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
+        .mode-btn:hover { background: rgba(255, 255, 255, 0.3); transform: translateY(-3px); }
+        .mode-btn.active { background: white; color: #117C0D; }
+        .question-type-selector { display: flex; justify-content: center; gap: 15px; margin-top: 20px; flex-wrap: wrap; }
+        .type-btn { background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(255, 255, 255, 0.5); color: white; padding: 8px 20px; border-radius: 25px; cursor: pointer; font-weight: bold; transition: all 0.3s; font-size: 0.95rem; }
+        .type-btn:hover { background: rgba(255, 255, 255, 0.2); transform: translateY(-3px); }
+        .type-btn.active { background: white; color: #117C0D; border-color: white; }
+        .info-bar { display: flex; justify-content: space-between; align-items: center; background-color: white; padding: 15px 25px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); }
+        .total-words { color: #117C0D; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+        .date-info { color: #666; font-style: italic; display: flex; align-items: center; gap: 8px; }
+        .instructions { background-color: rgba(255, 255, 255, 0.9); padding: 15px; border-radius: 10px; margin-bottom: 30px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); border-left: 5px solid #117C0D; }
+        .instructions h2 { color: #117C0D; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .instructions ul { padding-left: 20px; margin-bottom: 10px; }
+        .instructions li { margin-bottom: 5px; }
+        .import-section { background-color: white; border-radius: 15px; padding: 25px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); display: none; }
+        .import-section.active { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .import-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #f0f0f0; }
+        .import-header h3 { color: #117C0D; font-size: 1.4rem; }
+        .import-formats { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+        .format-tag { background-color: #e9f5e9; color: #117C0D; padding: 8px 15px; border-radius: 20px; font-size: 0.9rem; font-weight: bold; }
+        .file-upload-area { border: 3px dashed #117C0D; border-radius: 15px; padding: 40px 20px; text-align: center; margin-bottom: 25px; background-color: #f9fff9; transition: all 0.3s; cursor: pointer; }
+        .file-upload-area:hover { background-color: #f0faf0; }
+        .file-upload-area.drag-over { background-color: #e9f5e9; border-color: #2B9E25; }
+        .upload-icon { font-size: 3rem; color: #117C0D; margin-bottom: 15px; }
+        .upload-text { margin-bottom: 15px; font-size: 1.1rem; }
+        .upload-btn { background: linear-gradient(to right, #117C0D, #2B9E25); color: white; border: none; padding: 12px 30px; border-radius: 30px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 10px; }
+        .upload-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(17, 124, 13, 0.3); }
+        .file-input { display: none; }
+        .vocab-preview { margin-top: 30px; }
+        .vocab-preview h4 { color: #117C0D; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .preview-container { max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 10px; padding: 15px; background-color: #f9f9f9; }
+        .vocab-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; }
+        .vocab-item:last-child { border-bottom: none; }
+        .vocab-word { font-weight: bold; color: #117C0D; }
+        .vocab-meaning { color: #555; max-width: 70%; }
+        .import-actions { display: flex; justify-content: center; gap: 20px; margin-top: 25px; }
+        .action-btn { padding: 12px 30px; border-radius: 30px; font-size: 1rem; font-weight: bold; cursor: pointer; border: none; transition: all 0.3s; }
+        .generate-btn { background: linear-gradient(to right, #117C0D, #2B9E25); color: white; }
+        .clear-btn { background: linear-gradient(to right, #FAC75E, #FFB347); color: #333; }
+        .action-btn:hover { transform: translateY(-3px); }
+        .progress-container { display: flex; justify-content: space-between; align-items: center; background-color: white; padding: 15px 25px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); margin-bottom: 20px; }
+        .progress-bar { flex-grow: 1; height: 12px; background-color: #e0e0e0; border-radius: 6px; margin: 0 20px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(to right, #117C0D, #2B9E25); border-radius: 6px; width: 0%; transition: width 0.5s ease; }
+        .stats { display: flex; gap: 20px; font-weight: bold; align-items: center; }
+        .stat-item { padding: 8px 15px; border-radius: 8px; background-color: #f5f7fa; }
+        .correct-stat { color: #117C0D; }
+        .total-stat { color: #117C0D; }
+        .restart-btn { background: linear-gradient(to right, #FAC75E, #FFB347); color: #333; border: none; border-radius: 10px; padding: 12px 25px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: all 0.3s; box-shadow: 0 5px 15px rgba(250, 199, 94, 0.3); display: flex; align-items: center; gap: 8px; }
+        .restart-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(250, 199, 94, 0.4); }
+        .cards-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(500px, 1fr)); gap: 25px; margin-bottom: 40px; }
+        .card { height: 450px; perspective: 1000px; }
+        .card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.8s; transform-style: preserve-3d; border-radius: 20px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2); }
+        .card.flipped .card-inner { transform: rotateY(180deg); }
+        .card-front, .card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 20px; padding: 25px; overflow: hidden; display: flex; flex-direction: column; }
+        .card-front { background-color: white; color: #333; }
+        .card-back { background: linear-gradient(to bottom right, #117C0D, #2B9E25); color: white; transform: rotateY(180deg); overflow-y: auto; }
+        .card-number { display: inline-block; background: linear-gradient(to right, #117C0D, #2B9E25); color: white; width: 36px; height: 36px; border-radius: 50%; line-height: 36px; font-weight: bold; margin-bottom: 15px; flex-shrink: 0; }
+        .question { font-size: 1.2rem; line-height: 1.6; margin-bottom: 25px; flex-grow: 1; text-align: left; overflow-y: auto; padding-right: 5px; }
+        .blank { display: inline-block; min-width: 120px; height: 40px; background-color: #f0f0f0; border-radius: 8px; border: 2px dashed #117C0D; margin: 0 5px; vertical-align: middle; }
+        .spelling-input-container { margin: 20px 0; text-align: left; }
+        .spelling-hints { display: flex; gap: 20px; margin-bottom: 15px; flex-wrap: wrap; }
+        .hint-item { background-color: #f5f7fa; padding: 8px 15px; border-radius: 8px; font-size: 0.95rem; }
+        .spelling-input { width: 100%; padding: 15px; border: 2px solid #117C0D; border-radius: 10px; font-size: 1.2rem; text-align: center; margin-bottom: 10px; }
+        .spelling-input:focus { outline: none; box-shadow: 0 0 0 3px rgba(17, 124, 13, 0.3); }
+        .options-container { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px; overflow-y: auto; max-height: 180px; padding-right: 5px; }
+        .option { background-color: #f5f7fa; border: 2px solid #c3cfe2; border-radius: 10px; padding: 12px 5px; cursor: pointer; font-size: 1rem; transition: all 0.3s; text-align: center; min-height: 60px; display: flex; align-items: center; justify-content: center; }
+        .option:hover { background-color: #e1e8f7; transform: translateY(-3px); box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1); }
+        .option.selected { background-color: #FAC75E; color: #333; border-color: #FAC75E; transform: translateY(-3px); box-shadow: 0 5px 10px rgba(250, 199, 94, 0.3); }
+        .option.disabled { opacity: 0.6; cursor: not-allowed; }
+        .check-btn { background: linear-gradient(to right, #117C0D, #2B9E25); color: white; border: none; border-radius: 10px; padding: 14px 25px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 20px; transition: all 0.3s; box-shadow: 0 5px 15px rgba(17, 124, 13, 0.3); display: flex; align-items: center; justify-content: center; gap: 10px; flex-shrink: 0; }
+        .check-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(17, 124, 13, 0.4); }
+        .check-btn:active { transform: translateY(0); }
+        .check-btn:disabled { background: linear-gradient(to right, #cccccc, #aaaaaa); cursor: not-allowed; transform: none; box-shadow: none; }
+        .card-back h3 { margin-bottom: 15px; font-size: 1.5rem; color: white; flex-shrink: 0; }
+        .answer { background-color: rgba(255, 255, 255, 0.9); color: #333; padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: left; flex-shrink: 0; }
+        .answer .correct { color: #117C0D; font-weight: bold; margin-bottom: 8px; }
+        .answer .user-choice { color: #333; margin-bottom: 8px; }
+        .answer .result { font-weight: bold; }
+        .explanation { text-align: left; line-height: 1.6; background-color: rgba(255, 255, 255, 0.9); color: #333; padding: 15px; border-radius: 10px; flex-grow: 1; overflow-y: auto; margin-bottom: 15px; }
+        .explanation strong { color: #117C0D; }
+        .word-meaning { margin-top: 10px; padding: 12px; background-color: #f8f9fa; border-radius: 8px; border-left: 4px solid #117C0D; }
+        .wrong-explanation { text-align: left; line-height: 1.6; background-color: rgba(255, 255, 255, 0.9); color: #333; padding: 15px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #FAC75E; }
+        .back-btn { background: linear-gradient(to right, #FAC75E, #FFB347); color: #333; border: none; border-radius: 10px; padding: 14px 25px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: all 0.3s; box-shadow: 0 5px 15px rgba(250, 199, 94, 0.3); display: flex; align-items: center; justify-content: center; gap: 10px; flex-shrink: 0; }
+        .back-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(250, 199, 94, 0.4); }
+        .footer { text-align: center; padding: 20px; background-color: white; color: #666; font-size: 0.9rem; border-radius: 10px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); margin-top: 20px; }
+        .message-box { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; padding: 30px; border-radius: 15px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3); z-index: 1000; text-align: center; max-width: 500px; width: 90%; display: none; }
+        .message-box.active { display: block; animation: popUp 0.3s ease; }
+        @keyframes popUp { from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); } to { opacity: 1; transform: translate(-50%, -50%) scale(1); } }
+        .message-icon { font-size: 3rem; color: #117C0D; margin-bottom: 15px; }
+        .message-box h3 { color: #117C0D; margin-bottom: 15px; }
+        .message-box p { margin-bottom: 20px; line-height: 1.6; }
+        .message-btn { background: linear-gradient(to right, #117C0D, #2B9E25); color: white; border: none; padding: 12px 30px; border-radius: 30px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: all 0.3s; }
+        .message-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(17, 124, 13, 0.3); }
+        .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); z-index: 999; display: none; }
+        .overlay.active { display: block; }
+        
+        /* 新增时间显示样式 */
+        .time-info { 
+            color: #666; 
+            font-style: italic; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            background-color: #f8f9fa; 
+            padding: 5px 10px; 
+            border-radius: 5px; 
+            border-left: 3px solid #FAC75E; 
+        }
+        
+        /* 新增闪卡相关样式 */
+        .flashcard-section { 
+            background-color: white; 
+            border-radius: 15px; 
+            padding: 25px; 
+            margin-bottom: 30px; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); 
+            display: none; 
+        }
+        .flashcard-section.active { 
+            display: block; 
+            animation: fadeIn 0.5s ease; 
+        }
+        .flashcard-container { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 500px; 
+            perspective: 1000px; 
+            margin-bottom: 30px; 
+        }
+        .flashcard { 
+            width: 80%; 
+            height: 70%; 
+            position: relative; 
+            transform-style: preserve-3d; 
+            transition: transform 0.8s; 
+            border-radius: 20px; 
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2); 
+            cursor: pointer; 
+        }
+        .flashcard.flipped { 
+            transform: rotateY(180deg); 
+        }
+        .flashcard-front, .flashcard-back { 
+            position: absolute; 
+            width: 100%; 
+            height: 100%; 
+            backface-visibility: hidden; 
+            border-radius: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 40px; 
+        }
+        .flashcard-front { 
+            background: linear-gradient(to bottom right, #117C0D, #2B9E25); 
+            color: white; 
+        }
+        .flashcard-back { 
+            background-color: white; 
+            color: #333; 
+            transform: rotateY(180deg); 
+            overflow-y: auto; 
+            text-align: center; 
+        }
+        .flashcard-word { 
+            font-size: 3rem; 
+            font-weight: bold; 
+            margin-bottom: 20px; 
+            text-align: center; 
+        }
+        .flashcard-meaning { 
+            font-size: 1.5rem; 
+            line-height: 1.6; 
+            text-align: center; 
+        }
+        .flashcard-hint { 
+            font-size: 1rem; 
+            color: rgba(255, 255, 255, 0.8); 
+            margin-top: 20px; 
+            text-align: center; 
+        }
+        .flashcard-controls { 
+            display: flex; 
+            justify-content: center; 
+            gap: 20px; 
+            margin-top: 30px; 
+        }
+        .flashcard-btn { 
+            padding: 12px 30px; 
+            border-radius: 30px; 
+            font-size: 1rem; 
+            font-weight: bold; 
+            cursor: pointer; 
+            border: none; 
+            transition: all 0.3s; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+        }
+        .flip-btn { 
+            background: linear-gradient(to right, #117C0D, #2B9E25); 
+            color: white; 
+        }
+        .pass-btn { 
+            background: linear-gradient(to right, #2B9E25, #4CAF50); 
+            color: white; 
+        }
+        .keep-btn { 
+            background: linear-gradient(to right, #FAC75E, #FFB347); 
+            color: #333; 
+        }
+        .flashcard-btn:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); 
+        }
+        .flashcard-progress { 
+            text-align: center; 
+            margin-bottom: 20px; 
+            font-size: 1.1rem; 
+            color: #117C0D; 
+            font-weight: bold; 
+        }
+        .flashcard-progress span { 
+            background-color: #f0f7f0; 
+            padding: 5px 15px; 
+            border-radius: 20px; 
+        }
+        
+        @media (max-width: 1100px) { 
+            .cards-container { grid-template-columns: 1fr; } 
+            .flashcard { width: 90%; height: 60%; }
+            .flashcard-word { font-size: 2.5rem; }
+        }
+        @media (max-width: 600px) {
+            .container { padding: 10px; }
+            .cards-container { grid-template-columns: 1fr; gap: 20px; }
+            .card { height: 500px; }
+            .options-container { grid-template-columns: 1fr; }
+            h1 { font-size: 2rem; }
+            .progress-container { flex-direction: column; gap: 15px; }
+            .progress-bar { width: 100%; margin: 0; }
+            .info-bar { flex-direction: column; gap: 10px; text-align: center; }
+            .mode-selector { flex-direction: column; align-items: center; }
+            .mode-btn { width: 80%; }
+            .question-type-selector { gap: 10px; }
+            .type-btn { padding: 6px 15px; font-size: 0.9rem; }
+            .import-actions { flex-direction: column; }
+            .action-btn { width: 100%; }
+            .flashcard-container { height: 400px; }
+            .flashcard { width: 95%; height: 70%; }
+            .flashcard-word { font-size: 2rem; }
+            .flashcard-meaning { font-size: 1.2rem; }
+            .flashcard-controls { flex-direction: column; align-items: center; }
+            .flashcard-btn { width: 80%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay" id="overlay"></div>
+    <div class="message-box" id="messageBox">
+        <div class="message-icon"><i class="fas fa-check-circle" id="messageIcon"></i></div>
+        <h3 id="messageTitle">成功</h3>
+        <p id="messageText">操作已成功完成</p>
+        <button class="message-btn" id="messageCloseBtn">确定</button>
+    </div>
+    <div class="container">
+        <header>
+            <h1>Reborn单词英语版</h1>
+            <div class="subtitle">词汇检查测试 - 支持自定义词汇导入</div>
+            <div class="subtitle">天天进步，每日新生</div>
+            <div class="mode-selector">
+                <button class="mode-btn active" id="testModeBtn"><i class="fas fa-clipboard-check"></i> 进行测试</button>
+                <button class="mode-btn" id="importModeBtn"><i class="fas fa-file-import"></i> 导入词汇</button>
+                <button class="mode-btn" id="flashcardModeBtn"><i class="fas fa-id-card"></i> 闪卡复习</button>
+            </div>
+            <div class="question-type-selector">
+                <button class="type-btn active" id="typeMeaningBtn"><i class="fas fa-list"></i> 选择含义</button>
+                <button class="type-btn" id="typeSpellingBtn"><i class="fas fa-keyboard"></i> 词汇拼写</button>
+                <button class="type-btn" id="typeExportBtn"><i class="fas fa-download"></i> 导出错词</button>
+            </div>
+        </header>
+        <div class="info-bar">
+            <div class="total-words"><i class="fas fa-book"></i> 词汇表总数: <span id="vocab-count">0</span>个单词</div>
+            <div class="date-info"><i class="far fa-calendar-alt"></i> 测试日期: <span id="current-date"></span></div>
+            <div class="time-info" id="time-info" style="display: none;">
+                <i class="far fa-clock"></i> 用时: <span id="elapsed-time">0分0秒</span>
+            </div>
+        </div>
+        <div class="instructions" id="testInstructions">
+            <h2><i class="fas fa-info-circle"></i> 使用说明</h2>
+            <ul>
+                <li>选择适合您的题型：<strong>选择含义</strong>或<strong>词汇拼写</strong></li>
+                <li>完成所有题目后，可使用"重新开始"按钮重置测试</li>
+                <li>每答对一题，进度条会增加，右上角会显示答题统计</li>
+                <li>使用"导出错词"功能可将错误的词汇导出为Excel文件</li>
+            </ul>
+            <p><strong>提示：</strong> 系统会记录您完成本次测试的总用时。</p>
+        </div>
+        
+        <!-- 新增闪卡部分 -->
+        <div class="flashcard-section" id="flashcardSection">
+            <div class="import-header">
+                <h3><i class="fas fa-id-card"></i> 闪卡复习</h3>
+                <div class="total-words"><i class="fas fa-book"></i> 当前闪卡数: <span id="flashcard-count">0</span>个单词</div>
+            </div>
+            <div class="instructions">
+                <h2><i class="fas fa-info-circle"></i> 闪卡使用说明</h2>
+                <ul>
+                    <li>点击闪卡或"翻转"按钮查看单词释义</li>
+                    <li>"过"按钮：当前单词本轮不再显示</li>
+                    <li>"留"按钮：当前单词会随机插入后续复习循环</li>
+                    <li>使用导入的词汇进行闪卡复习，支持自定义词汇</li>
+                </ul>
+            </div>
+            
+            <div class="flashcard-progress" id="flashcardProgress">
+                <span>进度: <span id="current-flashcard">1</span>/<span id="total-flashcards">0</span></span>
+            </div>
+            
+            <div class="flashcard-container">
+                <div class="flashcard" id="flashcard">
+                    <div class="flashcard-front">
+                        <div class="flashcard-word" id="flashcardWord">单词</div>
+                        <div class="flashcard-hint">点击卡片或下方按钮翻转查看释义</div>
+                    </div>
+                    <div class="flashcard-back">
+                        <div class="flashcard-meaning" id="flashcardMeaning">释义</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flashcard-controls">
+                <button class="flashcard-btn pass-btn" id="passBtn">
+                    <i class="fas fa-forward"></i> 过
+                </button>
+                <button class="flashcard-btn flip-btn" id="flipBtn">
+                    <i class="fas fa-sync-alt"></i> 翻转
+                </button>
+                <button class="flashcard-btn keep-btn" id="keepBtn">
+                    <i class="fas fa-redo"></i> 留
+                </button>
+            </div>
+        </div>
+        
+        <div class="import-section" id="importSection">
+            <div class="import-header">
+                <h3><i class="fas fa-file-import"></i> 导入词汇文件</h3>
+                <div class="total-words"><i class="fas fa-book"></i> 已导入: <span id="imported-count">0</span>个单词</div>
+            </div>
+            <div class="instructions">
+                <h2><i class="fas fa-info-circle"></i> 导入说明</h2>
+                <ul>
+                    <li>支持的文件格式: TXT, DOC/DOCX, PDF, XLS/XLSX</li>
+                    <li>文件内容应为英文单词和中文释义的列表</li>
+                    <li>建议格式: 每行一个单词，格式为"单词 - 释义" 或 "单词: 释义"</li>
+                    <li>示例: abandon - 放弃, 遗弃; abundant - 丰富的, 充裕的</li>
+                </ul>
+            </div>
+            <div class="import-formats">
+                <div class="format-tag">TXT</div><div class="format-tag">DOC</div><div class="format-tag">DOCX</div><div class="format-tag">PDF</div><div class="format-tag">XLS</div><div class="format-tag">XLSX</div>
+            </div>
+            <div class="file-upload-area" id="fileUploadArea">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <div class="upload-text">
+                    <strong>点击选择文件或拖拽文件到这里</strong>
+                    <p>支持TXT, DOC, DOCX, PDF, XLS, XLSX格式</p>
+                </div>
+                <button class="upload-btn" id="uploadBtn"><i class="fas fa-folder-open"></i> 选择文件</button>
+                <input type="file" id="fileInput" class="file-input" accept=".txt,.doc,.docx,.pdf,.xls,.xlsx">
+            </div>
+            <div id="fileInfo" style="display:none; text-align:center; margin-bottom:20px;">
+                <p><i class="fas fa-file-alt"></i> 已选择文件: <span id="fileName"></span> (<span id="fileSize"></span> KB)</p>
+            </div>
+            <div class="vocab-preview" id="vocabPreview" style="display:none;">
+                <h4><i class="fas fa-list"></i> 词汇预览 (最多显示20个)</h4>
+                <div class="preview-container" id="previewContainer"></div>
+            </div>
+            <div class="import-actions">
+                <button class="action-btn generate-btn" id="generateTestBtn" disabled><i class="fas fa-play-circle"></i> 生成测试</button>
+                <button class="action-btn clear-btn" id="clearImportBtn"><i class="fas fa-trash-alt"></i> 清除导入</button>
+            </div>
+        </div>
+        <div id="testSection">
+            <div class="progress-container">
+                <div class="stat-item total-stat"><i class="fas fa-list-ol"></i> 题目: <span id="current-question">0</span>/<span id="total-questions">0</span></div>
+                <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+                <div class="stats">
+                    <div class="stat-item correct-stat"><i class="fas fa-check-circle"></i> 正确: <span id="correct-count">0</span></div>
+                    <button class="restart-btn" id="restart-btn"><i class="fas fa-redo"></i> 重新开始</button>
+                </div>
+            </div>
+            <div class="cards-container" id="cards-container"></div>
+        </div>
+        <div class="footer">
+            <p>Reborn单词英语版 - 词汇检查测试</p>
+            <p>支持自定义词汇导入 | 天天进步，每日新生</p>
+        </div>
+    </div>
+
+    <script>
+        // === 核心数据与常量 ===
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString('zh-CN');
+        const QUESTION_TYPES = { MEANING: 'meaning', SPELLING: 'spelling' };
+        let currentQuestionType = QUESTION_TYPES.MEANING;
+        let errorRecords = [], testSessionCount = 0;
+        
+        // 修改：每种题型分别计数重新开始次数
+        const MAX_RESTART_COUNT = 5;
+        let restartCounts = {
+            [QUESTION_TYPES.MEANING]: 0,
+            [QUESTION_TYPES.SPELLING]: 0
+        };
+        
+        // 新增时间相关变量
+        let testStartTime = null;
+        let elapsedSeconds = 0;
+        let timeInterval = null;
+        let isTestCompleted = false;
+
+        // 词汇数据
+        const defaultVocabulary = [
+            { word: "abandon", meaning: "v. 放弃, 遗弃", pos: "vt.", example: "The crew was forced to abandon the sinking ship during the severe storm." },
+            { word: "abundant", meaning: "adj. 丰富的, 充裕的", pos: "adj.", example: "The region has abundant natural resources, including rare minerals and extensive timber reserves." },
+            { word: "access", meaning: "n. 入口, 通道; v. 访问, 进入", pos: "n./vt.", example: "The new software allows authorized users to access the database remotely with enhanced security protocols." },
+            { word: "accommodation", meaning: "n. 住处, 住宿", pos: "n.", example: "The university guarantees accommodation for all first-year international students in on-campus residences." },
+            { word: "achieve", meaning: "v. 达到, 完成, 实现", pos: "vt.", example: "Through persistent effort and strategic planning, she managed to achieve all her ambitious career goals." },
+            { word: "acquire", meaning: "v. 获得, 取得", pos: "vt.", example: "Students are expected to acquire both theoretical knowledge and practical skills during their academic training." },
+            { word: "adapt", meaning: "v. 适应, 改编", pos: "v.", example: "Species must adapt to their changing environments through evolutionary processes to ensure survival." },
+            { word: "adequate", meaning: "adj. 足够的, 充足的", pos: "adj.", example: "The company failed to provide adequate safety training, resulting in preventable workplace accidents." },
+            { word: "adjacent", meaning: "adj. 邻近的, 毗邻的", pos: "adj.", example: "The hotel is adjacent to the international conference center, providing convenience for attendees." },
+            { word: "adjust", meaning: "v. 调整, 适应", pos: "v.", example: "Immigrants often need time to adjust to new cultural norms and social expectations." },
+            { word: "advantage", meaning: "n. 优势, 优点", pos: "n.", example: "Being bilingual provides a significant advantage in the increasingly globalized job market." },
+            { word: "advice", meaning: "n. 建议, 忠告", pos: "n.", example: "She sought professional financial advice before making substantial investment decisions." },
+            { word: "affect", meaning: "v. 影响, 感动", pos: "vt.", example: "The economic recession adversely affected small businesses more severely than large corporations." },
+            { word: "afford", meaning: "v. 买得起, 负担得起", pos: "vt.", example: "Few families can afford the skyrocketing cost of housing in major metropolitan areas." },
+            { word: "alternative", meaning: "n. 选择, 替代品; adj. 替代的", pos: "n./adj.", example: "Researchers are actively seeking alternative energy sources to replace finite fossil fuels." },
+            { word: "ambition", meaning: "n. 雄心, 抱负", pos: "n.", example: "His ambition to become a pioneering surgeon drove him through years of rigorous medical training." },
+            { word: "analyze", meaning: "v. 分析, 解析", pos: "vt.", example: "The research team will analyze the comprehensive survey data to identify significant demographic trends." },
+            { word: "annual", meaning: "adj. 每年的, 年度的", pos: "adj.", example: "The company's annual financial report shows consistent 15% growth in revenue over three consecutive years." },
+            { word: "anxious", meaning: "adj. 焦虑的, 担忧的", pos: "adj.", example: "Many high-achieving students experience anxious feelings before taking standardized examinations." },
+            { word: "apparent", meaning: "adj. 明显的, 显而易见的", pos: "adj.", example: "It was apparent from his non-verbal cues that he was not satisfied with the negotiation outcome." },
+            { word: "approach", meaning: "v. 接近, 靠近; n. 方法, 途径", pos: "n./v.", example: "The interdisciplinary research team adopted a novel approach to solve the complex environmental problem." },
+            { word: "appropriate", meaning: "adj. 适当的, 合适的", pos: "adj.", example: "Please ensure your comments during the professional conference are appropriate for the academic setting." },
+            { word: "approximate", meaning: "adj. 近似的, 大概的", pos: "adj.", example: "The approximate cost of the infrastructure project is estimated at two million dollars, pending final approvals." },
+            { word: "area", meaning: "n. 区域, 地区, 面积", pos: "n.", example: "This coastal area is particularly vulnerable to the adverse effects of sea-level rise and extreme weather events." },
+            { word: "aspect", meaning: "n. 方面, 方向", pos: "n.", example: "The comprehensive study examines multiple aspects of social media's complex impact on adolescent mental health." },
+            { word: "assess", meaning: "v. 评估, 评价", pos: "vt.", example: "Educators need to continuously assess students' learning progress throughout the academic semester." },
+            { word: "assume", meaning: "v. 假设, 假定", pos: "vt.", example: "Researchers cannot simply assume that findings from one cultural context apply universally across diverse populations." },
+            { word: "authority", meaning: "n. 权威, 权力", pos: "n.", example: "Local municipal authorities are responsible for implementing waste management and recycling programs." },
+            { word: "available", meaning: "adj. 可用的, 可获得的", pos: "adj.", example: "The complete dataset is not publicly available due to legitimate privacy and confidentiality concerns." },
+            { word: "benefit", meaning: "n. 利益, 好处; v. 有益于", pos: "n./v.", example: "Regular physical exercise provides multiple benefits for both physical health and psychological well-being." }
+        ];
+        let currentVocabulary = [...defaultVocabulary];
+        let importedVocabulary = [];
+
+        // 新增：闪卡相关变量
+        let flashcardVocabulary = [];
+        let currentFlashcardIndex = 0;
+        let flashcardsForReview = []; // "留"的单词会加入这里
+        let passedFlashcards = []; // "过"的单词会移到这里
+
+        // === 辅助函数：生成干扰项 ===
+        function generateDistractors(correctWord, correctVocab, count) {
+            const allWords = currentVocabulary.map(v => v.word).filter(w => w !== correctWord);
+            const shuffled = [...allWords].sort(() => Math.random() - 0.5);
+            return shuffled.slice(0, count);
+        }
+
+        // === 核心：根据题型创建题目 ===
+        function createQuestionsFromVocabulary(vocabList) {
+            const questions = [];
+            vocabList.forEach((vocab, index) => {
+                let question;
+                const questionNumber = index + 1;
+
+                if (currentQuestionType === QUESTION_TYPES.MEANING) {
+                    // 题型1: 选择含义
+                    const meaning = vocab.meaning;
+                    const firstMeaning = meaning.split(';')[0] || meaning;
+                    const chineseMeaning = firstMeaning.replace(/^[a-z. ]+/i, '').trim();
+                    const distractors = generateDistractors(vocab.word, vocab, 3);
+                    const allOptions = [vocab.word, ...distractors].sort(() => Math.random() - 0.5);
+
+                    question = {
+                        id: questionNumber,
+                        type: QUESTION_TYPES.MEANING,
+                        sentence: `这个单词的意思是"${chineseMeaning}"，对应的英文单词是：________`,
+                        correctAnswer: vocab.word,
+                        options: allOptions,
+                        explanation: `单词 "<strong>${vocab.word}</strong>" 的意思是：${vocab.meaning}`,
+                        fullMeaning: vocab.meaning,
+                        vocab: vocab
+                    };
+
+                } else if (currentQuestionType === QUESTION_TYPES.SPELLING) {
+                    // 题型2: 词汇拼写
+                    const meaning = vocab.meaning;
+                    let partOfSpeech = '';
+                    const posMatch = meaning.match(/^([a-z]+\.)/i);
+                    if (posMatch) partOfSpeech = posMatch[1];
+                    const firstMeaning = meaning.split(';')[0] || meaning;
+                    const chineseMeaning = firstMeaning.replace(/^[a-z. ]+/i, '').trim();
+                    const firstLetter = vocab.word.charAt(0).toLowerCase();
+
+                    question = {
+                        id: questionNumber,
+                        type: QUESTION_TYPES.SPELLING,
+                        sentence: `请根据提示拼写单词：`,
+                        correctAnswer: vocab.word.toLowerCase(),
+                        hints: { firstLetter, partOfSpeech, meaning: chineseMeaning },
+                        explanation: `正确拼写是 "<strong>${vocab.word}</strong>"，意思是：${vocab.meaning}`,
+                        fullMeaning: vocab.meaning,
+                        vocab: vocab
+                    };
+                }
+                if (question) questions.push(question);
+            });
+            return questions;
+        }
+
+        // === 出题数量逻辑 ===
+        function getQuestionCount() {
+            const total = currentVocabulary.length;
+            if (total <= 40) return 20;
+            if (total <= 80) return 25;
+            return 30;
+        }
+        
+        function getRandomVocabulary() {
+            const needCount = getQuestionCount();
+            const shuffled = [...currentVocabulary].sort(() => Math.random() - 0.5);
+            return shuffled.slice(0, needCount);
+        }
+
+        // === 新增：闪卡功能 ===
+        function initFlashcards() {
+            // 使用当前词汇表（优先使用导入的词汇）
+            if (importedVocabulary.length > 0) {
+                flashcardVocabulary = [...importedVocabulary];
+            } else {
+                flashcardVocabulary = [...currentVocabulary];
+            }
+            
+            // 重置闪卡状态
+            currentFlashcardIndex = 0;
+            flashcardsForReview = [];
+            passedFlashcards = [];
+            
+            // 随机打乱闪卡顺序
+            flashcardVocabulary = [...flashcardVocabulary].sort(() => Math.random() - 0.5);
+            
+            // 更新UI
+            updateFlashcardCount();
+            showFlashcard();
+        }
+        
+        function showFlashcard() {
+            if (flashcardVocabulary.length === 0) {
+                document.getElementById('flashcardWord').textContent = "无可用词汇";
+                document.getElementById('flashcardMeaning').textContent = "请先导入词汇";
+                document.getElementById('flashcardProgress').innerHTML = '<span>进度: 0/0</span>';
+                return;
+            }
+            
+            const currentCard = flashcardVocabulary[currentFlashcardIndex];
+            document.getElementById('flashcardWord').textContent = currentCard.word;
+            document.getElementById('flashcardMeaning').textContent = currentCard.meaning;
+            
+            // 重置卡片为正面
+            document.getElementById('flashcard').classList.remove('flipped');
+            
+            // 更新进度
+            document.getElementById('current-flashcard').textContent = currentFlashcardIndex + 1;
+            document.getElementById('total-flashcards').textContent = flashcardVocabulary.length;
+            document.getElementById('flashcardProgress').innerHTML = 
+                `<span>进度: ${currentFlashcardIndex + 1}/${flashcardVocabulary.length} (留: ${flashcardsForReview.length}, 过: ${passedFlashcards.length})</span>`;
+        }
+        
+        function nextFlashcard() {
+            // 检查是否有需要复习的单词
+            if (flashcardsForReview.length > 0 && Math.random() > 0.7) {
+                // 30%的概率插入一个需要复习的单词
+                const reviewIndex = Math.floor(Math.random() * flashcardsForReview.length);
+                flashcardVocabulary.splice(currentFlashcardIndex + 1, 0, flashcardsForReview[reviewIndex]);
+            }
+            
+            // 移动到下一个卡片
+            if (currentFlashcardIndex < flashcardVocabulary.length - 1) {
+                currentFlashcardIndex++;
+            } else {
+                // 如果已经到达最后一个卡片，检查是否有需要复习的卡片
+                if (flashcardsForReview.length > 0) {
+                    // 将需要复习的卡片加入词汇表
+                    flashcardVocabulary.push(...flashcardsForReview);
+                    flashcardsForReview = [];
+                    currentFlashcardIndex++;
+                } else {
+                    // 没有更多卡片，显示完成消息
+                    showMessage('闪卡复习完成', `您已复习完所有闪卡！<br>总共复习了 ${flashcardVocabulary.length} 个单词。`, 'success');
+                    // 回到第一个卡片
+                    currentFlashcardIndex = 0;
+                }
+            }
+            
+            showFlashcard();
+        }
+        
+        function updateFlashcardCount() {
+            document.getElementById('flashcard-count').textContent = flashcardVocabulary.length;
+        }
+        
+        // === 新增：时间管理功能 ===
+        function startTimer() {
+            testStartTime = new Date();
+            elapsedSeconds = 0;
+            isTestCompleted = false;
+            
+            // 显示时间信息区域
+            document.getElementById('time-info').style.display = 'flex';
+            updateTimeDisplay();
+            
+            // 每秒更新一次时间显示
+            timeInterval = setInterval(() => {
+                elapsedSeconds++;
+                updateTimeDisplay();
+                
+                // 检查测试是否完成
+                checkTestCompletion();
+            }, 1000);
+        }
+        
+        function stopTimer() {
+            if (timeInterval) {
+                clearInterval(timeInterval);
+                timeInterval = null;
+            }
+        }
+        
+        function updateTimeDisplay() {
+            const minutes = Math.floor(elapsedSeconds / 60);
+            const seconds = elapsedSeconds % 60;
+            document.getElementById('elapsed-time').textContent = `${minutes}分${seconds}秒`;
+        }
+        
+        function checkTestCompletion() {
+            if (!isTestCompleted && answerSubmitted.every(submitted => submitted)) {
+                isTestCompleted = true;
+                stopTimer();
+                
+                // 显示完成消息和用时
+                const minutes = Math.floor(elapsedSeconds / 60);
+                const seconds = elapsedSeconds % 60;
+                showMessage('测试完成', `恭喜！您已完成全部题目。<br>本次测试用时: <strong>${minutes}分${seconds}秒</strong><br>正确率: <strong>${correctCount}/${questions.length}</strong>`, 'success');
+            }
+        }
+        
+        function resetTimer() {
+            stopTimer();
+            elapsedSeconds = 0;
+            document.getElementById('time-info').style.display = 'none';
+            document.getElementById('elapsed-time').textContent = '0分0秒';
+        }
+        
+        // === 修改：重新开始次数限制 - 每种题型分别计数 ===
+        function checkRestartLimit(questionType) {
+            // 获取当前题型的重新开始次数
+            const currentRestartCount = restartCounts[questionType];
+            
+            if (currentRestartCount >= MAX_RESTART_COUNT) {
+                const typeName = questionType === QUESTION_TYPES.MEANING ? "选择含义" : "词汇拼写";
+                showMessage('提示', `您今天"${typeName}"练习重复的次数太多啦，需要再次复习哦！<br>您已经重新开始了 ${currentRestartCount} 次。`, 'info');
+                return false;
+            }
+            
+            // 增加当前题型的重新开始次数
+            restartCounts[questionType]++;
+            
+            // 保存到本地存储
+            saveRestartCounts();
+            
+            return true;
+        }
+        
+        function resetRestartCounts() {
+            // 每天重置（基于日期）
+            const today = new Date().toLocaleDateString('zh-CN');
+            const lastReset = localStorage.getItem('lastRestartReset');
+            
+            if (lastReset !== today) {
+                // 重置所有题型的计数
+                restartCounts[QUESTION_TYPES.MEANING] = 0;
+                restartCounts[QUESTION_TYPES.SPELLING] = 0;
+                
+                localStorage.setItem('lastRestartReset', today);
+                localStorage.setItem('restartCounts', JSON.stringify(restartCounts));
+            } else {
+                // 从本地存储读取
+                const savedCounts = localStorage.getItem('restartCounts');
+                if (savedCounts) {
+                    restartCounts = JSON.parse(savedCounts);
+                }
+            }
+        }
+        
+        function saveRestartCounts() {
+            localStorage.setItem('restartCounts', JSON.stringify(restartCounts));
+        }
+
+        // === 其余功能函数 ===
+        // 初始化变量
+        let questions = [];
+        let userAnswers = [];
+        let correctCount = 0;
+        let answerSubmitted = [];
+        let tempSelections = [];
+        let spellingInputs = [];
+
+        // DOM元素
+        const cardsContainer = document.getElementById('cards-container');
+        const progressFill = document.getElementById('progress-fill');
+        const currentQuestionSpan = document.getElementById('current-question');
+        const totalQuestionsSpan = document.getElementById('total-questions');
+        const correctCountSpan = document.getElementById('correct-count');
+        const restartBtn = document.getElementById('restart-btn');
+
+        // 初始化测试
+        function initTest() {
+            // 检查当前题型的重新开始次数限制
+            if (!checkRestartLimit(currentQuestionType)) {
+                return;
+            }
+            
+            testSessionCount++;
+
+            // 停止之前的计时器
+            resetTimer();
+
+            // 随机抽取单词
+            const randomVocab = getRandomVocabulary();
+
+            // 创建题目
+            questions = createQuestionsFromVocabulary(randomVocab);
+
+            // 重置所有变量
+            userAnswers = new Array(questions.length).fill(null);
+            answerSubmitted = new Array(questions.length).fill(false);
+            tempSelections = new Array(questions.length).fill(null);
+            spellingInputs = new Array(questions.length).fill('');
+            correctCount = 0;
+            correctCountSpan.textContent = correctCount;
+            totalQuestionsSpan.textContent = questions.length;
+            vocabCount.textContent = currentVocabulary.length;
+
+            // 生成卡片
+            generateCards();
+
+            // 开始计时
+            setTimeout(() => {
+                startTimer();
+            }, 500);
+
+            // 滚动到顶部
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // 生成卡片
+        function generateCards() {
+            cardsContainer.innerHTML = '';
+
+            questions.forEach((question, index) => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.id = `card-${question.id}`;
+
+                const isAnswered = answerSubmitted[index];
+                const userAnswer = userAnswers[index];
+                const isCorrect = isAnswered && userAnswer === question.correctAnswer;
+                const tempSelection = tempSelections[index];
+                const spellingInput = spellingInputs[index];
+
+                // 根据题型生成不同的卡片内容
+                let frontContent = '';
+
+                if (question.type === QUESTION_TYPES.MEANING) {
+                    frontContent = `
+                        <div class="card-number">${question.id}</div>
+                        <div class="question">
+                            ${question.sentence}
+                        </div>
+                        <div class="options-container">
+                            ${question.options.map(option => `
+                                <div class="option ${tempSelection === option ? 'selected' : ''} ${isAnswered ? 'disabled' : ''}" data-option="${option}">${option}</div>
+                            `).join('')}
+                        </div>
+                        <button class="check-btn" data-id="${question.id}" ${!tempSelection ? 'disabled' : ''}>
+                            <i class="fas fa-check-circle"></i> ${isAnswered ? '查看答案' : '检查答案'}
+                        </button>
+                    `;
+                } else if (question.type === QUESTION_TYPES.SPELLING) {
+                    frontContent = `
+                        <div class="card-number">${question.id}</div>
+                        <div class="question">
+                            ${question.sentence}
+                        </div>
+                        <div class="spelling-input-container">
+                            <div class="spelling-hints">
+                                <div class="hint-item">首字母: ${question.hints.firstLetter}</div>
+                                <div class="hint-item">词性: ${question.hints.partOfSpeech || '未知'}</div>
+                                <div class="hint-item">中文: ${question.hints.meaning}</div>
+                            </div>
+                            <input type="text" class="spelling-input" data-id="${question.id}" 
+                                   placeholder="请输入单词拼写" value="${spellingInput || ''}"
+                                   ${isAnswered ? 'disabled' : ''}>
+                        </div>
+                        <button class="check-btn" data-id="${question.id}" ${!spellingInput ? 'disabled' : ''}>
+                            <i class="fas fa-check-circle"></i> ${isAnswered ? '查看答案' : '检查答案'}
+                        </button>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="card-inner">
+                        <div class="card-front">
+                            ${frontContent}
+                        </div>
+                        <div class="card-back">
+                            <div class="card-number">${question.id}</div>
+                            <h3>答案与解析</h3>
+                            <div class="answer">
+                                <div class="correct">正确答案: ${question.correctAnswer}</div>
+                                <div class="user-choice">你的${question.type === QUESTION_TYPES.SPELLING ? '拼写' : '选择'}: ${userAnswer ? userAnswer : '未作答'}</div>
+                                <div class="result">${isAnswered ? (isCorrect ? '<span style="color:#117C0D">✓ 回答正确</span>' : '<span style="color:#E74C3C">✗ 回答错误</span>') : ''}</div>
+                            </div>
+                            <div class="explanation">
+                                ${question.explanation}
+                                <div class="word-meaning">
+                                    <strong>完整释义:</strong> ${question.fullMeaning}
+                                </div>
+                            </div>
+                            ${userAnswer && userAnswer !== question.correctAnswer ? 
+                                `<div class="wrong-explanation">
+                                    <strong>注意:</strong> 你的${question.type === QUESTION_TYPES.SPELLING ? '拼写' : '选择'}不正确，请记住正确的${question.type === QUESTION_TYPES.SPELLING ? '拼写' : '答案'}。
+                                </div>` : ''
+                            }
+                            <button class="back-btn" data-id="${question.id}">
+                                <i class="fas fa-undo"></i> 返回题目
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                cardsContainer.appendChild(card);
+
+                // 根据题型绑定事件
+                if (question.type === QUESTION_TYPES.MEANING) {
+                    // 添加选项点击事件
+                    const optionElements = card.querySelectorAll('.option');
+                    const checkBtn = card.querySelector('.check-btn');
+
+                    optionElements.forEach(option => {
+                        option.addEventListener('click', () => {
+                            if (!isAnswered) {
+                                // 取消同一卡片中其他选项的选中状态
+                                optionElements.forEach(opt => opt.classList.remove('selected'));
+                                // 选中当前选项
+                                option.classList.add('selected');
+                                tempSelections[index] = option.dataset.option;
+
+                                // 启用检查答案按钮
+                                checkBtn.disabled = false;
+                            }
+                        });
+                    });
+
+                    // 添加检查答案按钮点击事件
+                    checkBtn.addEventListener('click', () => {
+                        if (!isAnswered && tempSelections[index]) {
+                            // 提交答案
+                            userAnswers[index] = tempSelections[index];
+                            answerSubmitted[index] = true;
+
+                            // 检查是否正确
+                            const isAnswerCorrect = userAnswers[index].toLowerCase() === question.correctAnswer.toLowerCase();
+                            if (isAnswerCorrect) {
+                                correctCount++;
+                                correctCountSpan.textContent = correctCount;
+                            }
+
+                            // 记录错误
+                            recordErrorWord(question, userAnswers[index], isAnswerCorrect);
+
+                            updateProgress();
+
+                            // 刷新当前卡片以更新显示
+                            refreshCard(index);
+                        }
+
+                        // 翻转卡片显示答案
+                        card.classList.add('flipped');
+                    });
+                } else if (question.type === QUESTION_TYPES.SPELLING) {
+                    // 添加拼写输入事件
+                    const spellingInput = card.querySelector('.spelling-input');
+                    const checkBtn = card.querySelector('.check-btn');
+
+                    spellingInput.addEventListener('input', (e) => {
+                        spellingInputs[index] = e.target.value.trim();
+                        checkBtn.disabled = !spellingInputs[index];
+                    });
+
+                    // 添加检查答案按钮点击事件
+                    checkBtn.addEventListener('click', () => {
+                        if (!isAnswered && spellingInputs[index]) {
+                            // 提交答案
+                            userAnswers[index] = spellingInputs[index];
+                            answerSubmitted[index] = true;
+
+                            // 检查是否正确（不区分大小写）
+                            const isAnswerCorrect = userAnswers[index].toLowerCase() === question.correctAnswer.toLowerCase();
+                            if (isAnswerCorrect) {
+                                correctCount++;
+                                correctCountSpan.textContent = correctCount;
+                            }
+
+                            // 记录错误
+                            recordErrorWord(question, userAnswers[index], isAnswerCorrect);
+
+                            updateProgress();
+
+                            // 刷新当前卡片以更新显示
+                            refreshCard(index);
+                        }
+
+                        // 翻转卡片显示答案
+                        card.classList.add('flipped');
+                    });
+                }
+
+                // 添加返回题目按钮事件
+                const backBtn = card.querySelector('.back-btn');
+                if (backBtn) {
+                    backBtn.addEventListener('click', () => {
+                        card.classList.remove('flipped');
+                    });
+                }
+            });
+
+            updateProgress();
+        }
+
+        // 刷新单个卡片
+        function refreshCard(index) {
+            const card = document.getElementById(`card-${questions[index].id}`);
+            if (!card) return;
+
+            const question = questions[index];
+            const isAnswered = answerSubmitted[index];
+            const userAnswer = userAnswers[index];
+            const isCorrect = isAnswered && userAnswer.toLowerCase() === question.correctAnswer.toLowerCase();
+            const tempSelection = tempSelections[index];
+            const spellingInput = spellingInputs[index];
+
+            // 根据题型生成不同的卡片内容
+            let frontContent = '';
+
+            if (question.type === QUESTION_TYPES.MEANING) {
+                frontContent = `
+                    <div class="card-number">${question.id}</div>
+                    <div class="question">
+                        ${question.sentence}
+                    </div>
+                    <div class="options-container">
+                        ${question.options.map(option => `
+                            <div class="option ${tempSelection === option ? 'selected' : ''} ${isAnswered ? 'disabled' : ''}" data-option="${option}">${option}</div>
+                        `).join('')}
+                    </div>
+                    <button class="check-btn" data-id="${question.id}" ${!tempSelection ? 'disabled' : ''}>
+                        <i class="fas fa-check-circle"></i> ${isAnswered ? '查看答案' : '检查答案'}
+                    </button>
+                `;
+            } else if (question.type === QUESTION_TYPES.SPELLING) {
+                frontContent = `
+                    <div class="card-number">${question.id}</div>
+                    <div class="question">
+                        ${question.sentence}
+                    </div>
+                    <div class="spelling-input-container">
+                        <div class="spelling-hints">
+                            <div class="hint-item">首字母: ${question.hints.firstLetter}</div>
+                            <div class="hint-item">词性: ${question.hints.partOfSpeech || '未知'}</div>
+                            <div class="hint-item">中文: ${question.hints.meaning}</div>
+                        </div>
+                        <input type="text" class="spelling-input" data-id="${question.id}" 
+                               placeholder="请输入单词拼写" value="${spellingInput || ''}"
+                               ${isAnswered ? 'disabled' : ''}>
+                    </div>
+                    <button class="check-btn" data-id="${question.id}" ${!spellingInput ? 'disabled' : ''}>
+                        <i class="fas fa-check-circle"></i> ${isAnswered ? '查看答案' : '检查答案'}
+                    </button>
+                `;
+            }
+
+            // 更新卡片内容
+            card.innerHTML = `
+                <div class="card-inner">
+                    <div class="card-front">
+                        ${frontContent}
+                    </div>
+                    <div class="card-back">
+                        <div class="card-number">${question.id}</div>
+                        <h3>答案与解析</h3>
+                        <div class="answer">
+                            <div class="correct">正确答案: ${question.correctAnswer}</div>
+                            <div class="user-choice">你的${question.type === QUESTION_TYPES.SPELLING ? '拼写' : '选择'}: ${userAnswer ? userAnswer : '未作答'}</div>
+                            <div class="result">${isAnswered ? (isCorrect ? '<span style="color:#117C0D">✓ 回答正确</span>' : '<span style="color:#E74C3C">✗ 回答错误</span>') : ''}</div>
+                        </div>
+                        <div class="explanation">
+                            ${question.explanation}
+                            <div class="word-meaning">
+                                <strong>完整释义:</strong> ${question.fullMeaning}
+                            </div>
+                        </div>
+                        ${userAnswer && !isCorrect ? 
+                            `<div class="wrong-explanation">
+                                <strong>注意:</strong> 你的${question.type === QUESTION_TYPES.SPELLING ? '拼写' : '选择'}不正确，请记住正确的${question.type === QUESTION_TYPES.SPELLING ? '拼写' : '答案'}。
+                            </div>` : ''
+                        }
+                        <button class="back-btn" data-id="${question.id}">
+                            <i class="fas fa-undo"></i> 返回题目
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // 重新绑定事件
+            if (question.type === QUESTION_TYPES.MEANING) {
+                const optionElements = card.querySelectorAll('.option');
+                const checkBtn = card.querySelector('.check-btn');
+                const backBtn = card.querySelector('.back-btn');
+
+                optionElements.forEach(option => {
+                    option.addEventListener('click', () => {
+                        if (!answerSubmitted[index]) {
+                            optionElements.forEach(opt => opt.classList.remove('selected'));
+                            option.classList.add('selected');
+                            tempSelections[index] = option.dataset.option;
+                            checkBtn.disabled = false;
+                        }
+                    });
+                });
+
+                checkBtn.addEventListener('click', () => {
+                    card.classList.add('flipped');
+                });
+
+                if (backBtn) {
+                    backBtn.addEventListener('click', () => {
+                        card.classList.remove('flipped');
+                    });
+                }
+            } else if (question.type === QUESTION_TYPES.SPELLING) {
+                const spellingInput = card.querySelector('.spelling-input');
+                const checkBtn = card.querySelector('.check-btn');
+                const backBtn = card.querySelector('.back-btn');
+
+                spellingInput.addEventListener('input', (e) => {
+                    spellingInputs[index] = e.target.value.trim();
+                    checkBtn.disabled = !spellingInputs[index];
+                });
+
+                checkBtn.addEventListener('click', () => {
+                    card.classList.add('flipped');
+                });
+
+                if (backBtn) {
+                    backBtn.addEventListener('click', () => {
+                        card.classList.remove('flipped');
+                    });
+                }
+            }
+        }
+
+        // 更新进度条
+        function updateProgress() {
+            const answeredCount = answerSubmitted.filter(submitted => submitted).length;
+            const progressPercentage = (answeredCount / questions.length) * 100;
+            progressFill.style.width = `${progressPercentage}%`;
+            currentQuestionSpan.textContent = answeredCount;
+            
+            // 检查测试是否完成
+            checkTestCompletion();
+        }
+
+        // 记录错误词汇
+        function recordErrorWord(question, userAnswer, isCorrect) {
+            if (isCorrect) return;
+
+            const record = {
+                session: testSessionCount,
+                type: getQuestionTypeName(question.type),
+                word: question.vocab.word,
+                correctAnswer: question.correctAnswer,
+                userAnswer: userAnswer || null,
+                time: new Date().toLocaleString('zh-CN'),
+                elapsedTime: `${Math.floor(elapsedSeconds/60)}分${elapsedSeconds%60}秒`
+            };
+
+            errorRecords.push(record);
+        }
+
+        // 获取题型名称
+        function getQuestionTypeName(type) {
+            switch(type) {
+                case QUESTION_TYPES.MEANING: return '选择含义';
+                case QUESTION_TYPES.SPELLING: return '词汇拼写';
+                default: return '未知题型';
+            }
+        }
+
+        // 导出错误词汇
+        function exportErrorWords() {
+            if (errorRecords.length === 0) {
+                showMessage('提示', '暂无错误词汇记录', 'info');
+                return;
+            }
+
+            // 创建CSV内容
+            let csvContent = "序号,测试次数,题型,错误单词,正确答案,错误答案,时间,用时\n";
+
+            errorRecords.forEach((record, index) => {
+                csvContent += `${index + 1},${record.session},${record.type},${record.word},${record.correctAnswer},${record.userAnswer || '未作答'},${record.time},${record.elapsedTime}\n`;
+            });
+
+            // 创建下载链接
+            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', `错词记录_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showMessage('成功', `已导出 ${errorRecords.length} 条错词记录`, 'success');
+        }
+
+        // 显示消息框
+        function showMessage(title, text, type = 'success') {
+            const messageBox = document.getElementById('messageBox');
+            const messageTitle = document.getElementById('messageTitle');
+            const messageText = document.getElementById('messageText');
+            const messageIcon = document.getElementById('messageIcon');
+            const overlay = document.getElementById('overlay');
+
+            // 设置图标和颜色
+            if (type === 'success') {
+                messageIcon.className = 'fas fa-check-circle';
+                messageIcon.style.color = '#117C0D';
+            } else if (type === 'error') {
+                messageIcon.className = 'fas fa-exclamation-circle';
+                messageIcon.style.color = '#E74C3C';
+            } else {
+                messageIcon.className = 'fas fa-info-circle';
+                messageIcon.style.color = '#FAC75E';
+            }
+
+            messageTitle.textContent = title;
+            messageText.innerHTML = text;
+
+            messageBox.classList.add('active');
+            overlay.classList.add('active');
+
+            // 点击关闭按钮
+            document.getElementById('messageCloseBtn').onclick = function() {
+                messageBox.classList.remove('active');
+                overlay.classList.remove('active');
+            };
+
+            // 点击遮罩层关闭
+            overlay.onclick = function() {
+                messageBox.classList.remove('active');
+                overlay.classList.remove('active');
+            };
+        }
+
+        // 模式切换
+        const testModeBtn = document.getElementById('testModeBtn');
+        const importModeBtn = document.getElementById('importModeBtn');
+        const flashcardModeBtn = document.getElementById('flashcardModeBtn');
+        const testSection = document.getElementById('testSection');
+        const importSection = document.getElementById('importSection');
+        const flashcardSection = document.getElementById('flashcardSection');
+        const testInstructions = document.getElementById('testInstructions');
+
+        testModeBtn.addEventListener('click', () => {
+            testModeBtn.classList.add('active');
+            importModeBtn.classList.remove('active');
+            flashcardModeBtn.classList.remove('active');
+            testSection.style.display = 'block';
+            testInstructions.style.display = 'block';
+            importSection.classList.remove('active');
+            flashcardSection.classList.remove('active');
+        });
+
+        importModeBtn.addEventListener('click', () => {
+            importModeBtn.classList.add('active');
+            testModeBtn.classList.remove('active');
+            flashcardModeBtn.classList.remove('active');
+            testSection.style.display = 'none';
+            testInstructions.style.display = 'none';
+            importSection.classList.add('active');
+            flashcardSection.classList.remove('active');
+        });
+
+        flashcardModeBtn.addEventListener('click', () => {
+            flashcardModeBtn.classList.add('active');
+            testModeBtn.classList.remove('active');
+            importModeBtn.classList.remove('active');
+            testSection.style.display = 'none';
+            testInstructions.style.display = 'none';
+            importSection.classList.remove('active');
+            flashcardSection.classList.add('active');
+            
+            // 初始化闪卡
+            initFlashcards();
+        });
+
+        // 题型选择
+        const typeMeaningBtn = document.getElementById('typeMeaningBtn');
+        const typeSpellingBtn = document.getElementById('typeSpellingBtn');
+        const typeExportBtn = document.getElementById('typeExportBtn');
+
+        typeMeaningBtn.addEventListener('click', () => {
+            setQuestionType(QUESTION_TYPES.MEANING);
+        });
+
+        typeSpellingBtn.addEventListener('click', () => {
+            setQuestionType(QUESTION_TYPES.SPELLING);
+        });
+
+        typeExportBtn.addEventListener('click', () => {
+            exportErrorWords();
+        });
+
+        function setQuestionType(type) {
+            currentQuestionType = type;
+
+            // 更新按钮状态
+            typeMeaningBtn.classList.remove('active');
+            typeSpellingBtn.classList.remove('active');
+
+            if (type === QUESTION_TYPES.MEANING) {
+                typeMeaningBtn.classList.add('active');
+            } else if (type === QUESTION_TYPES.SPELLING) {
+                typeSpellingBtn.classList.add('active');
+            }
+
+            // 重新初始化测试
+            initTest();
+        }
+
+        // 文件上传相关
+        const fileInput = document.getElementById('fileInput');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const fileInfo = document.getElementById('fileInfo');
+        const vocabPreview = document.getElementById('vocabPreview');
+        const previewContainer = document.getElementById('previewContainer');
+        const generateTestBtn = document.getElementById('generateTestBtn');
+        const clearImportBtn = document.getElementById('clearImportBtn');
+        const vocabCount = document.getElementById('vocab-count');
+        const importedCount = document.getElementById('imported-count');
+
+        // 上传按钮点击事件
+        uploadBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // 拖拽文件上传
+        fileUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.add('drag-over');
+        });
+
+        fileUploadArea.addEventListener('dragleave', () => {
+            fileUploadArea.classList.remove('drag-over');
+        });
+
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.remove('drag-over');
+
+            if (e.dataTransfer.files.length) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+
+        // 文件选择事件
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        // 处理文件
+        function handleFile(file) {
+            // 检查文件类型
+            const validExtensions = ['.txt', '.doc', '.docx', '.pdf', '.xls', '.xlsx'];
+            const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+
+            if (!validExtensions.includes(fileExt)) {
+                showMessage('错误', '不支持的文件格式，请选择TXT、DOC、DOCX、PDF、XLS或XLSX文件', 'error');
+                return;
+            }
+
+            // 更新文件信息显示
+            fileName.textContent = file.name;
+            fileSize.textContent = (file.size / 1024).toFixed(2);
+            fileInfo.style.display = 'block';
+
+            // 根据文件类型处理
+            if (fileExt === '.txt') {
+                handleTextFile(file);
+            } else {
+                // 对于非TXT文件，显示模拟导入结果
+                simulateFileImport(file.name);
+            }
+        }
+
+        // 处理文本文件
+        function handleTextFile(file) {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const content = e.target.result;
+                parseVocabulary(content);
+            };
+
+            reader.onerror = function() {
+                showMessage('错误', '读取文件失败，请重试', 'error');
+            };
+
+            reader.readAsText(file);
+        }
+
+        // 解析词汇
+        function parseVocabulary(text) {
+            const lines = text.split('\n');
+            importedVocabulary = [];
+
+            for (let line of lines) {
+                line = line.trim();
+                if (!line) continue;
+
+                // 尝试不同格式解析: "单词 - 释义" 或 "单词: 释义"
+                let word, meaning;
+
+                if (line.includes(' - ')) {
+                    [word, meaning] = line.split(' - ', 2);
+                } else if (line.includes(': ')) {
+                    [word, meaning] = line.split(': ', 2);
+                } else if (line.includes('\t')) {
+                    [word, meaning] = line.split('\t', 2);
+                } else {
+                    // 如果没有分隔符，尝试按空格分割
+                    const parts = line.split(' ');
+                    if (parts.length >= 2) {
+                        word = parts[0];
+                        meaning = parts.slice(1).join(' ');
+                    } else {
+                        continue; // 跳过无法解析的行
+                    }
+                }
+
+                word = word.trim();
+                meaning = meaning ? meaning.trim() : '';
+
+                if (word && meaning) {
+                    // 为词汇添加一个示例句子（模拟）
+                    const example = getExampleSentence(word);
+                    importedVocabulary.push({ word, meaning, example });
+                }
+            }
+
+            // 更新UI
+            updateVocabularyPreview();
+            importedCount.textContent = importedVocabulary.length;
+            generateTestBtn.disabled = importedVocabulary.length === 0;
+
+            if (importedVocabulary.length > 0) {
+                showMessage('成功', `成功导入 ${importedVocabulary.length} 个词汇`, 'success');
+            } else {
+                showMessage('提示', '未找到有效词汇，请检查文件格式', 'info');
+            }
+        }
+
+        // 获取示例句子（模拟函数）
+        function getExampleSentence(word) {
+            // 在实际应用中，这里应该从数据库或API获取例句
+            // 这里使用一些通用例句
+            const examples = [
+                `I need to learn the word "${word}" for my English test.`,
+                `The word "${word}" is commonly used in academic writing.`,
+                `Can you use "${word}" in a sentence?`,
+                `The meaning of "${word}" is important to understand this text.`,
+                `She looked up the definition of "${word}" in the dictionary.`
+            ];
+
+            return examples[Math.floor(Math.random() * examples.length)];
+        }
+
+        // 模拟导入非TXT文件（在实际应用中需要后端支持）
+        function simulateFileImport(fileName) {
+            // 模拟解析文件并生成一些示例词汇
+            const exampleVocab = [
+                { word: "consume", meaning: "v. 消耗, 消费", example: "The car consumes a lot of fuel." },
+                { word: "contact", meaning: "n. 联系, 接触; v. 联系", example: "Please contact me if you have any questions." },
+                { word: "contemporary", meaning: "adj. 当代的, 同时代的", example: "She writes about contemporary issues." },
+                { word: "context", meaning: "n. 上下文, 背景", example: "You need to understand the context of the story." },
+                { word: "contrast", meaning: "n. 对比, 对照; v. 对比", example: "There is a sharp contrast between the two styles." },
+                { word: "contribute", meaning: "v. 贡献, 投稿", example: "Everyone contributed to the discussion." },
+                { word: "controversy", meaning: "n. 争议, 争论", example: "The decision caused a lot of controversy." },
+                { word: "convenient", meaning: "adj. 方便的, 便利的", example: "The location is very convenient." },
+                { word: "convince", meaning: "v. 说服, 使信服", example: "He tried to convince me to go with him." },
+                { word: "cooperate", meaning: "v. 合作, 配合", example: "We need to cooperate to solve this problem." }
+            ];
+
+            // 根据文件名决定导入多少词汇
+            let vocabCount = 15;
+            if (fileName.includes('large') || fileName.includes('full')) {
+                vocabCount = 30;
+            }
+
+            importedVocabulary = exampleVocab.slice(0, vocabCount);
+
+            // 更新UI
+            updateVocabularyPreview();
+            importedCount.textContent = importedVocabulary.length;
+            generateTestBtn.disabled = importedVocabulary.length === 0;
+
+            showMessage('模拟导入', `成功从 ${fileName} 导入 ${importedVocabulary.length} 个词汇 (模拟)`, 'success');
+        }
+
+        // 更新词汇预览
+        function updateVocabularyPreview() {
+            previewContainer.innerHTML = '';
+
+            const maxPreview = 20;
+            const previewVocab = importedVocabulary.slice(0, maxPreview);
+
+            previewVocab.forEach(item => {
+                const vocabItem = document.createElement('div');
+                vocabItem.className = 'vocab-item';
+                vocabItem.innerHTML = `
+                    <div class="vocab-word">${item.word}</div>
+                    <div class="vocab-meaning">${item.meaning}</div>
+                `;
+                previewContainer.appendChild(vocabItem);
+            });
+
+            if (importedVocabulary.length > maxPreview) {
+                const moreItem = document.createElement('div');
+                moreItem.className = 'vocab-item';
+                moreItem.innerHTML = `
+                    <div class="vocab-word">...</div>
+                    <div class="vocab-meaning">还有 ${importedVocabulary.length - maxPreview} 个词汇未显示</div>
+                `;
+                previewContainer.appendChild(moreItem);
+            }
+
+            vocabPreview.style.display = 'block';
+        }
+
+        // 生成测试按钮点击事件
+        generateTestBtn.addEventListener('click', () => {
+            if (importedVocabulary.length === 0) {
+                showMessage('提示', '请先导入词汇', 'info');
+                return;
+            }
+
+            // 使用导入的词汇
+            currentVocabulary = [...importedVocabulary];
+            vocabCount.textContent = currentVocabulary.length;
+
+            // 切换到测试模式
+            testModeBtn.click();
+
+            // 初始化测试
+            initTest();
+
+            showMessage('成功', `已生成基于 ${currentVocabulary.length} 个词汇的测试`, 'success');
+        });
+
+        // 清除导入按钮点击事件
+        clearImportBtn.addEventListener('click', () => {
+            importedVocabulary = [];
+            fileInfo.style.display = 'none';
+            vocabPreview.style.display = 'none';
+            generateTestBtn.disabled = true;
+            importedCount.textContent = '0';
+            fileInput.value = '';
+
+            showMessage('已清除', '导入的词汇已清除', 'info');
+        });
+
+        // 页面加载时初始化测试
+        document.addEventListener('DOMContentLoaded', () => {
+            // 初始化词汇计数
+            vocabCount.textContent = currentVocabulary.length;
+            importedCount.textContent = importedVocabulary.length;
+            
+            // 初始化重新开始次数
+            resetRestartCounts();
+
+            // 初始化测试
+            initTest();
+        });
+
+        // 添加重新开始按钮事件
+        restartBtn.addEventListener('click', initTest);
+        
+        // 新增：闪卡按钮事件绑定
+        document.getElementById('flipBtn').addEventListener('click', function() {
+            document.getElementById('flashcard').classList.toggle('flipped');
+        });
+        
+        document.getElementById('passBtn').addEventListener('click', function() {
+            if (flashcardVocabulary.length === 0) return;
+            
+            // 将当前卡片标记为"过"
+            const currentCard = flashcardVocabulary[currentFlashcardIndex];
+            passedFlashcards.push(currentCard);
+            
+            // 从当前列表中移除
+            flashcardVocabulary.splice(currentFlashcardIndex, 1);
+            
+            // 如果移除后索引超出范围，调整索引
+            if (currentFlashcardIndex >= flashcardVocabulary.length) {
+                currentFlashcardIndex = Math.max(0, flashcardVocabulary.length - 1);
+            }
+            
+            // 更新UI
+            updateFlashcardCount();
+            showFlashcard();
+            
+            // 显示提示
+            showMessage('标记为"过"', `"${currentCard.word}" 将在本轮不再显示`, 'info');
+        });
+        
+        document.getElementById('keepBtn').addEventListener('click', function() {
+            if (flashcardVocabulary.length === 0) return;
+            
+            // 将当前卡片标记为"留"
+            const currentCard = flashcardVocabulary[currentFlashcardIndex];
+            flashcardsForReview.push(currentCard);
+            
+            // 移动到下一个卡片
+            nextFlashcard();
+            
+            // 显示提示
+            showMessage('标记为"留"', `"${currentCard.word}" 将会随机插入后续复习`, 'info');
+        });
+        
+        // 闪卡点击翻转事件
+        document.getElementById('flashcard').addEventListener('click', function() {
+            this.classList.toggle('flipped');
+        });
+    </script>
+</body>
+</html>
